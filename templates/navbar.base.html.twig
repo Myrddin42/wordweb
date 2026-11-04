@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{# Set page title according to parameter **page_title**,  #}
+{% block title %}{% if page_title is defined %}{{ page_title }}{% else %}WordWeb{% endif %}{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        html, body {
+          margin: 0;
+          height: 100%;
+        }
+
+        .content-panel {
+          margin-top: 20px;
+          border: 1px solid black;
+          border-radius: 10px;
+          background-color: #EEE;
+          padding: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<nav aria-label="breadcrumb" class="navbar bg-body-tertiary gy-5">
+  <div class="container">
+    <ol class="breadcrumb">
+      {% for breadcrumb in breadcrumbs %}
+        {% if not loop.last %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.name }}</a></li>
+        {% else %}
+          <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.name }}</li>
+        {% endif %}
+      {% endfor %}
+    </ol>
+  </div>
+</nav>
+
+<div class="container content-panel">
+  {% block content %}Seems like you did not set the <b>content</b> block!{% endblock %}
+</div>
+{% endblock %}

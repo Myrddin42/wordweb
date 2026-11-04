@@ -1,0 +1,152 @@
+{% extends 'navbar.base.html.twig' %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <a type="button" class="btn btn-primary" href="{{ path('series_new') }}">New Series</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="container text-center">
+                    <div class="row">
+                        <div class="col-8">
+                            <a href="/bla">Unassigned Books</a>
+                        </div>
+                        <div class="col-4">
+                            {# No button here, as this exists only to organize things #}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <hr>
+                        </div>
+                    </div>
+                    {% for series in bookSeries %}
+                        <div class="row">
+                            <div class="col-8"">
+                                <a href="#" id="series_name_{{ series.id }}">{{ series.name }}</a>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-danger" onclick="askReallyDelete({{ series.id }})">Delete</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="seriesDeleteModal" tabindex="-1" aria-labelledby="seriesDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="seriesDeleteModalLabel">Delete Series</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the series: <b id="delete_modal_text">SERIES?</b>
+                <br>
+                <b style="color: red">THIS CAN NOT BE REVERTED!</b>
+                <br><br>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="checkDeleteBooksWithSeries" onchange="handleDeleteBooksCheckboxChange()">
+                    <label class="form-check-label" for="checkDeleteBooksWithSeries">
+                        Also delete all books in it
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="series_dialog_delete_button" type="button" class="btn btn-danger" href="#">Delete Series</a>
+            </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_footer %}
+    <script type="text/javascript">
+        // Get a handle to the delete modal
+        const deleteModal = new bootstrap.Modal(document.getElementById('seriesDeleteModal'), {})
+        // Hard coded path to series remove endpoint
+        const seriesDeleteEndpointTemplate = "/series/remove/"
+
+        /**
+        * Shows the dialog to delete a series
+        */
+        function askReallyDelete(series_id) {
+            // Update the dialog text
+            let series_link           = document.getElementById("series_name_" + series_id)
+            let modal_placeholder_tag = document.getElementById("delete_modal_text")
+            if (series_link == null) {
+                alert("Called delete on a series that is not listed on this page!")
+                return
+            } else if (modal_placeholder_tag == null) {
+                alert("Failed to locate placeholder tag in delete dialog!")
+                return
+            }
+            modal_placeholder_tag.innerHTML = series_link.innerHTML
+
+            // Update the delete url
+            updateDialogDeleteUrl(series_id)
+
+            // Reset the delete books checkbox, to make sure the user doesn't delete more than intended by accident
+            if (!resetDeleteBooksCheckbox(series_id)) {
+                return
+            }
+
+            // Show the dialog
+            deleteModal.show()
+        }
+
+        function handleDeleteBooksCheckboxChange() {
+            // Get a reference to the checkbox
+            let delete_books_checkbox = document.getElementById("checkDeleteBooksWithSeries")
+            if (delete_books_checkbox == null) {
+                alert("Failed to locate book deletion checkbox, something is broken!")
+                return false
+            }
+            // Update the delete URL accordingly to the new state of the checkbox
+            updateDialogDeleteUrl(delete_books_checkbox.getAttribute("data-series-id"), delete_books_checkbox.checked)
+        }
+
+        /**
+        * Resets the checkbox which tells the application to also delete all books from the series
+        */
+        function resetDeleteBooksCheckbox(series_id) {
+            // Get a reference to the checkbox
+            let delete_books_checkbox = document.getElementById("checkDeleteBooksWithSeries")
+            if (delete_books_checkbox == null) {
+                alert("Failed to locate book deletion checkbox!")
+                return false
+            }
+            // Reset the checkbox
+            delete_books_checkbox.checked = false
+            // Persist the id of the series to delete for later update use
+            delete_books_checkbox.setAttribute("data-series-id", series_id)
+            return true
+        }
+
+        /**
+        * Updates the deletion URL, which will be called when one confirms that one wants to remove a series
+        */
+        function updateDialogDeleteUrl(series_id, delete_books = false) {
+            // Get a reference to the delete button
+            let dialog_delete_button = document.getElementById("series_dialog_delete_button")
+            if (dialog_delete_button == null) {
+                alert("Failed to locate delete button in dialog, can't set correct remove path!")
+                return
+            }
+            // Update the delete url accordingly to the given parameters
+            let delete_url = seriesDeleteEndpointTemplate + series_id
+            if (delete_books) {
+                delete_url += "?delete_books=1"
+            }
+            dialog_delete_button.setAttribute("href", delete_url)
+        }
+    </script>
+{% endblock %}

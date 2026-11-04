@@ -12,7 +12,7 @@ build: ## Builds the application and packages it into a Docker Container
 	@docker/build.sh prod
 
 ##
-## These commands are used to help with the application's development
+## These commands are used to help with the application's development:
 ##
 
 dev-build: ## Builds the development Docker Image

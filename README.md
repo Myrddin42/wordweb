@@ -23,9 +23,28 @@ neat, and the license permits it, feel free to take it and make it your own.
 
 ## Building the Project
 
-docker-buildx
-TODO
+This project has the following build dependencies:
 
-## Setup and Usage
+* Docker (with buildx component)
+* The Make utility
+
+After these dependencies have been installed, one can build the application as a Docker Image via the **build** Make Target:
+
+```bash
+make build
+```
+
+> **NOTE!** At the moment, there is no "production" build yet, as the application is still under development.
+
+To see all available make targets, one can use the default **help** Make Target:
+
+```bash
+# "help" is the first target, so it will be called by default, if no other was given
+make
+# One can also call it directly, like so:
+make help
+```
+
+## Development Environment
 
 TODO

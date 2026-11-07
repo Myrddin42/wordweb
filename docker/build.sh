@@ -16,7 +16,7 @@ SCRIPT_DIR="$(dirname $0)"
 cd "${SCRIPT_DIR}"
 
 # Load shared stuff
-source envvars.sh
+source ../helper-scripts/envvars.sh
 
 # Check if the Dockerfile exists
 DOCKERFILE="$1.dockerfile"

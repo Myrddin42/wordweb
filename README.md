@@ -47,4 +47,53 @@ make help
 
 ## Development Environment
 
-TODO
+During development, this repository will be mounted into a special Docker Container which will serve it
+via Apache with the PHP module. A prerequisite for this is that one has to first build the Docker Image
+said container will be created from via the following make target:
+
+```bash
+make dev-build
+```
+
+After this, the container is to be created with:
+
+```bash
+make dev-start
+```
+
+> The same target will start the container, if it already exists. It will **NOT** deploy a newer version of the conainer, if one rebuild the image itself!
+
+To stop, or even destroy the container, use these targets:
+
+```bash
+# Only stops the container
+make dev-stop
+# Removes the container
+make dev-down
+```
+
+One the first start, the application will not be ready to run yet, as the PHP dependencies are not
+included inside the repository, neither is any database. To initialize both, use the **dev-init**
+target:
+
+```bash
+make dev-init
+```
+
+This will run **composer install** inside the development container, instruct Symfony to create
+the database and run all migrations against it. After that, the application ought to be reachable
+at [http://localhost:8888](http://localhost:8888)
+
+To enter the development container use:
+
+```bash
+make dev-shell
+```
+
+This will open a shell into the development container, so that one can execute commands in it. Like
+say [bin/phpunit](bin/phpunit), to run the tests to make sure that everything works correctly.
+Alternatively, the tests can be run via:
+
+```bash
+make dev-test
+```

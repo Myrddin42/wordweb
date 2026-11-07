@@ -18,6 +18,35 @@ use Symfony\Component\Routing\Attribute\Route;
 class SeriesController extends AbstractController
 {
     /**
+     * Provides a form so that a user can edit a series
+     */
+    #[Route('/edit/{id:series}')]
+    public function edit(BookSeries $series, Request $request, EntityManagerInterface $entityManager) {
+        // Take the supplied series, then put it into the form we use to edit it
+        $changeForm = $this->createForm(BookSeriesType::class, $series);
+        $changeForm->add('Change', SubmitType::class);
+
+        // Check if the user send us any changes to make
+        $changeForm->handleRequest($request);
+        if ($changeForm->isSubmitted() && $changeForm->isValid()) {
+            // The series should now be changed, so tell the Entity Manager to persist the changes
+            $entityManager->flush();
+            // Go back to the index page
+            return $this->redirectToRoute("series_index");
+        }
+
+        // Show the form to the user
+        return $this->render(
+            'series/form.html.twig',
+            [
+                "page_title"  => "Edit Series: " . $series->getName(),
+                "breadcrumbs" => [["name" => "Series", "url" => $this->generateUrl("series_index")], ["name" => $series->getName(), "url" => "#"]],
+                "seriesForm"  => $changeForm
+            ]
+        );
+    }
+
+    /**
      * Lists all series
      */
     #[Route('/', name: 'series_index')]
@@ -30,9 +59,9 @@ class SeriesController extends AbstractController
         return $this->render(
             'series/index.html.twig',
             [
-                "page_title" => "Series",
+                "page_title"  => "Series",
                 "breadcrumbs" => [["name" => "Series", "url" => "#"]],
-                "bookSeries" => $series
+                "bookSeries"  => $series
             ]
         );
     }
@@ -61,11 +90,11 @@ class SeriesController extends AbstractController
         }
 
         return $this->render(
-            'series/new.html.twig',
+            'series/form.html.twig',
             [
-                "page_title" => "New Series",
+                "page_title"  => "New Series",
                 "breadcrumbs" => [["name" => "Series", "url" => $this->generateUrl("series_index")], ["name" => "New", "url" => "#"]],
-                "newSeriesForm" => $newSeriesForm
+                "seriesForm"  => $newSeriesForm
             ]
         );
     }

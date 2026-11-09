@@ -19,8 +19,9 @@ check_dev_container_up
 # Get PHP dependencies
 docker exec -it -u localuser --workdir /app ww-dev-env composer install
 
-# Create the databas, if it doesn't exists
-docker exec -it -u localuser --workdir /app ww-dev-env bin/console doctrine:database:create --if-not-exists
+# TODO: Run database migrations
+#docker exec -it -u localuser --workdir /app ww-dev-env bin/console doctrine:migrations:migrate --all-or-nothing
 
-# Run database migrations
-docker exec -it -u localuser --workdir /app ww-dev-env bin/console doctrine:migrations:migrate --all-or-nothing
+# (For now only do schema update)
+docker exec -it -u localuser --workdir /app ww-dev-env bin/console doctrine:schema:update --force
+docker exec -it -u localuser --workdir /app ww-dev-env bin/console doctrine:schema:update --force --env=test

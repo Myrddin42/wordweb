@@ -1,0 +1,57 @@
+{% extends 'navbar.base.html.twig' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <h1>Unassigned Books</h1>
+            </div>
+            <div class="col-2">
+                {# Placeholder for layout #}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <i>Virtual series which all books are put in that don't belong to a series of their own.</i>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <a type="button" class="btn btn-primary" href="{{ path('book_new') }}">New Book</a>
+            </div>
+        </div>
+        <div class="row">
+            {# Show the books in the series #}
+            <div class="col-12">
+                {# Open a new row to start listing books #}
+                <div class="row" style="margin-top: 20px">
+                {% for book in books %}
+                    <div class="col-3">
+                        <div class="card" style="width: 18rem;">
+                            <img src="/covers/placeholder.png" class="card-img-top" alt="Cover of: ">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ book.name }}</h5>
+                                <p class="card-text">{{ book.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Close the row after every third item #}
+                    {% if (loop.index % 4 == 0) %}
+                        </div>
+                        <div class="row" style="margin-top: 20px">
+                    {% endif %}
+                {% endfor %}
+
+                {# There will be at least one open row to close #}
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -11,6 +11,9 @@ build: ## Builds the application and packages it into a Docker Container
 	echo TODO: After we got a MVP
 	@docker/build.sh prod
 
+clean: ## Removes every file which is not part of the project, to produce a clean slate (i.e. to test setup with)
+	git clean -dxf
+
 ##
 ## These commands are used to build a Docker Image to aid in local development, and to control the
 ## container created from it:

@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\BookSeriesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use SortDirection;
 
 #[ORM\Entity(repositoryClass: BookSeriesRepository::class)]
 class BookSeries
@@ -20,6 +23,18 @@ class BookSeries
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
+
+    /**
+     * @var Collection<int, Book>
+     */
+    #[ORM\OneToMany(targetEntity: Book::class, mappedBy: 'series')]
+    #[OrderBy(['name' => SortDirection::Ascending])]
+    private Collection $books;
+
+    public function __construct()
+    {
+        $this->books = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -46,6 +61,36 @@ class BookSeries
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Book>
+     */
+    public function getBooks(): Collection
+    {
+        return $this->books;
+    }
+
+    public function addBook(Book $book): static
+    {
+        if (!$this->books->contains($book)) {
+            $this->books->add($book);
+            $book->setSeries($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBook(Book $book): static
+    {
+        if ($this->books->removeElement($book)) {
+            // set the owning side to null (unless already changed)
+            if ($book->getSeries() === $this) {
+                $book->setSeries(null);
+            }
+        }
 
         return $this;
     }

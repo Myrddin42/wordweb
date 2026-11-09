@@ -2,12 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Book;
 use App\Entity\BookSeries;
 use App\Form\BookSeriesType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -15,12 +16,12 @@ use Symfony\Component\Routing\Attribute\Route;
  * This controller manages book series
  */
 #[Route(['/series', '/'])]
-class SeriesController extends AbstractController
+final class SeriesController extends AbstractController
 {
     /**
      * Provides a form so that a user can edit a series
      */
-    #[Route('/edit/{id:series}')]
+    #[Route('/edit/{id:series}', name: 'series_edit')]
     public function edit(BookSeries $series, Request $request, EntityManagerInterface $entityManager) {
         // Take the supplied series, then put it into the form we use to edit it
         $changeForm = $this->createForm(BookSeriesType::class, $series);
@@ -32,7 +33,7 @@ class SeriesController extends AbstractController
             // The series should now be changed, so tell the Entity Manager to persist the changes
             $entityManager->flush();
             // Go back to the index page
-            return $this->redirectToRoute("series_index");
+            return $this->redirectToRoute("series_show", ["id" => $series->getId()]);
         }
 
         // Show the form to the user
@@ -41,7 +42,7 @@ class SeriesController extends AbstractController
             [
                 "page_title"  => "Edit Series: " . $series->getName(),
                 "breadcrumbs" => [["name" => "Series", "url" => $this->generateUrl("series_index")], ["name" => $series->getName(), "url" => "#"]],
-                "seriesForm"  => $changeForm
+                "series_form"  => $changeForm
             ]
         );
     }
@@ -94,7 +95,7 @@ class SeriesController extends AbstractController
             [
                 "page_title"  => "New Series",
                 "breadcrumbs" => [["name" => "Series", "url" => $this->generateUrl("series_index")], ["name" => "New", "url" => "#"]],
-                "seriesForm"  => $newSeriesForm
+                "series_form"  => $newSeriesForm
             ]
         );
     }
@@ -102,7 +103,7 @@ class SeriesController extends AbstractController
     /**
      * Removes the given series
      */
-    #[Route('/remove/{id:series}')]
+    #[Route('/remove/{id:series}', name: 'series_remove')]
     public function remove(BookSeries $series, Request $request, EntityManagerInterface $entityManager): Response
     {
         // Get the delete parameter, or a good default
@@ -110,5 +111,39 @@ class SeriesController extends AbstractController
         // Remove the series, and send the user back to the index page
         $entityManager->getRepository(BookSeries::class)->removeSeries($series, $paramDeleteBooks == "1");
         return $this->redirectToRoute("series_index");
+    }
+
+    /**
+     * Shows the given series in detail
+     */
+    #[Route('/show/{id:series}', name: 'series_show')]
+    public function show(BookSeries $series, Request $request): Response
+    {
+        return $this->render(
+            'series/show.html.twig',
+            [
+                "page_title"  => "Series: " . $series->getName(),
+                "breadcrumbs" => [["name" => "Series", "url" => $this->generateUrl("series_index")], ["name" => $series->getName(), "url" => "#"]],
+                "series"      => $series
+            ]
+        );
+    }
+
+    /**
+     * Shows all books which do not belong to a series
+     */
+    #[Route('/unassgined', name: 'series_unassigned')]
+    public function unassigned(EntityManagerInterface $entityManager): Response
+    {
+        // Fetch all books which are not assigned to a series
+        $bookRepository = $entityManager->getRepository(Book::class);
+        return $this->render(
+            'series/unassigned.html.twig',
+            [
+                "page_title"  => "Unassigned Books",
+                "breadcrumbs" => [["name" => "Series", "url" => $this->generateUrl("series_index")], ["name" => "Unassigned Books", "url" => "#"]],
+                "books"       => $bookRepository->findAllUnassigned()
+            ]
+        );
     }
 }
